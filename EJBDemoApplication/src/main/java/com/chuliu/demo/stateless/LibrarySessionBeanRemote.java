@@ -13,4 +13,6 @@ public interface LibrarySessionBeanRemote {
     void addBook(String bookName);
 
     List getBooks();
+
+    String getSingleBook(String bookName);
 }

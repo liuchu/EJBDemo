@@ -1,11 +1,13 @@
 package com.chuliu.demo.stateless;
 
+import javax.ejb.Stateless;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by chuliu on 2018/5/1.
  */
+@Stateless
 public class LibrarySessionBean implements LibrarySessionBeanRemote {
 
     List<String> bookShelf;
@@ -21,5 +23,10 @@ public class LibrarySessionBean implements LibrarySessionBeanRemote {
 
     public List getBooks() {
         return bookShelf;
+    }
+
+    @Override
+    public String getSingleBook(String bookName) {
+        return bookName;
     }
 }
