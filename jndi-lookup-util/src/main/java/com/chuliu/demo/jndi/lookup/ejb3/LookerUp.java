@@ -13,11 +13,25 @@ public class LookerUp {
     private Properties prop = new Properties();
     private String jndiPrefix;
 
-    // Same WAR
+    //In Same WAR
     public LookerUp(){
         prop.put(Context.URL_PKG_PREFIXES, "org.jboss.ejb.client.naming");
     }
 
+    //In Same EAR
+    public LookerUp(String address, int httpPort){
+
+        String protocol;
+        protocol = "http-remoting";
+        prop.put(Context.INITIAL_CONTEXT_FACTORY, "org.jboss.naming.remote.client.InitialContextFactory");
+        prop.put(Context.PROVIDER_URL, protocol+"://"+address+":"+httpPort+"/");
+        prop.put("jboss.naming.client.ejb.context", true);
+        prop.put(Context.URL_PKG_PREFIXES, "org.jboss.ejb.client.naming");
+        jndiPrefix="ejb";
+
+    }
+
+    //Find local session bean
     public Object findLocalSessionBean(String moduleName, String beanName, String interfaceFullQualifiedName) {
 
         Context context = null;
@@ -28,15 +42,43 @@ public class LookerUp {
             e.printStackTrace();
         }
         String jndiUri = "java:global/"+moduleName+"/"+beanName+"!"+interfaceFullQualifiedName;
-        System.out.println("JNDI URI: "+jndiUri);
-
 
         Object object = null;
         try {
             object = context.lookup(jndiUri);
             context.close();
         } catch (NamingException e) {
-            System.out.println("Failed to look up "+beanName);
+            System.out.println("Failed to look up "+beanName+". The JNDI URI is:"+jndiUri);
+            e.printStackTrace();
+        }
+
+        return object;
+    }
+
+    //Find remote session bean
+    public Object findRemoteSessionBean(SessionBeanType beanType, String earName, String moduleName, String deploymentDistinctName, String beanName, String interfaceFullQualifiedName){
+
+        String suffix = "";
+        if(beanType.equals(SessionBeanType.STATEFUL)){
+            suffix = "?stateful";
+        }
+
+        Context context = null;
+
+        try {
+            context = new InitialContext(prop);
+        }catch (NamingException e) {
+            System.out.println("Failed to init naming context");
+            e.printStackTrace();
+        }
+
+
+        Object object = null;
+        try {
+            object = context.lookup(jndiPrefix+":"+earName+"/"+moduleName+"/"+deploymentDistinctName+"/"+beanName+"!"+interfaceFullQualifiedName+suffix);
+            context.close();
+        } catch (NamingException e) {
+            System.out.println();
             e.printStackTrace();
         }
 
@@ -54,6 +96,10 @@ public class LookerUp {
         }
 
         return object;
+    }
+
+    public enum SessionBeanType {
+        STATEFUL,STATELESS,SINGLETON
     }
 
 }

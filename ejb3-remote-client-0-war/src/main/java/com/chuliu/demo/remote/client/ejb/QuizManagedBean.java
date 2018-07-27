@@ -1,12 +1,12 @@
-package com.chuliu.demo.ejb3serverclientwar.com.chuliu.demo.ejb;
+package com.chuliu.demo.remote.client.ejb;
 
 /**
  * Created by eiuhucl on 7/23/2018.
  */
 
-import com.chuliu.demo.ejb3.server.api.ILocalPlayedQuizzesCounter;
-import com.chuliu.demo.ejb3.server.api.ILocalQuiz;
-import com.chuliu.demo.ejb3.server.api.IPlayedQuizzesCounter;
+
+import com.chuliu.demo.ejb3.server.api.IRemotePlayedQuizzesCounter;
+import com.chuliu.demo.ejb3.server.api.IRemoteQuiz;
 import com.chuliu.demo.jndi.lookup.ejb3.LookerUp;
 
 public class QuizManagedBean {
@@ -20,9 +20,9 @@ public class QuizManagedBean {
 
     // I'm not DI'ing it!
     //@EJB
-    private ILocalQuiz quizProxy;
+    private IRemoteQuiz  quizProxy;
 
-    private ILocalPlayedQuizzesCounter playedQuizzesCounterProxy;
+    private IRemotePlayedQuizzesCounter playedQuizzesCounterProxy;
 
     public static QuizManagedBean buildInstance(){
 
@@ -39,21 +39,29 @@ public class QuizManagedBean {
 
     public void setup(){
         System.out.println("Started quiz game.");
-        String moduleName = "ejb3-server-client-war"; // WAR name OR ejb-jar.xml module-name
+
+        //####
+        String ejbsServerAddress = "127.0.0.1";
+        int ejbsServerPort = 8080;
+        String earName = "ejb3-server-client-ear";
+        String moduleName = "ejb3-server-war";
+        String deploymentDistinctName = "";
         String beanName = "QuizBean";
-        String interfaceQualifiedName = ILocalQuiz.class.getName();
+        String interfaceQualifiedName = IRemoteQuiz.class.getName();
 
         // No password required <= Component deployed in the same container
-        LookerUp wildf9Lookerup = new LookerUp();
+        LookerUp wildf9Lookerup = new LookerUp(ejbsServerAddress, ejbsServerPort);
 
-        // We could instead the following method by giving the exact JNDI name :
-        // wildf9Lookerup.findSessionBean("java:global/ejb3-server-client-war/QuizBean!com.letsprog.learning.ejb3.server.api.ILocalQuiz")
-        quizProxy = (ILocalQuiz) wildf9Lookerup.findLocalSessionBean(moduleName,beanName,interfaceQualifiedName); // Good
+        // We could instead use the following method by giving the exact JNDI name :
+//		 quizProxy = (IRemoteQuiz) wildf9Lookerup.findSessionBean("ejb:ejb3-server-client-ear/ejb3-server-war//QuizBean!com.letsprog.learning.ejb3.server.api.IRemoteQuiz?stateful");
+        quizProxy = (IRemoteQuiz) wildf9Lookerup.findRemoteSessionBean(LookerUp.SessionBeanType.STATEFUL, earName, moduleName, deploymentDistinctName,
+                beanName, interfaceQualifiedName);
 
-        String moduleName2 = "ejb3-server-client-war"; // WAR name OR ejb-jar.xml module-name
-        String beanName2 = "PlayedQuizzesCounterBean";
-        String interfaceQualifiedName2 = ILocalPlayedQuizzesCounter.class.getName();
-        playedQuizzesCounterProxy = (ILocalPlayedQuizzesCounter) wildf9Lookerup.findLocalSessionBean(moduleName2,beanName2,interfaceQualifiedName2);
+        //playedQuizzesCounterProxy
+        String beanCounterName = "PlayedQuizzesCounterBean";
+        String counterInterfaceQualifiedName = IRemotePlayedQuizzesCounter.class.getName();
+        playedQuizzesCounterProxy = (IRemotePlayedQuizzesCounter) wildf9Lookerup.findRemoteSessionBean(LookerUp.SessionBeanType.SINGLETON, earName, moduleName, deploymentDistinctName,
+                beanCounterName, counterInterfaceQualifiedName);
 
         quizProxy.begin(playerName);
     }
@@ -68,16 +76,9 @@ public class QuizManagedBean {
 
         playedQuizzesCounterProxy.increment();
 
-        if(quizProxy == null ){
-            System.out.println("quizProxy is null");
-            return false;
-        }
-
         boolean correct = quizProxy.verifyAnswerAndReward(answer);
 
         int gotScore = quizProxy.getScore();
-        System.out.println("Score in QuziManagedBean is: "+gotScore);
-        setScore(gotScore);
 
         if(!correct){
             quizProxy.end();

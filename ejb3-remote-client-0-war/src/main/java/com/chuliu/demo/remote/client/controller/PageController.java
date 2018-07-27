@@ -1,16 +1,11 @@
-package com.chuliu.demo.ejb3serverclientwar.com.chuliu.demo.controller;
+package com.chuliu.demo.remote.client.controller;
 
-import com.chuliu.demo.ejb3serverclientwar.com.chuliu.demo.ejb.QuizManagedBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import com.chuliu.demo.remote.client.ejb.QuizManagedBean;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.naming.NamingException;
 
 /**
  * Created by eiuhucl on 7/23/2018.
