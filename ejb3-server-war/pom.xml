@@ -29,6 +29,7 @@
     </dependencies>
 
     <build>
+        <finalName>ejb3-server-war</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

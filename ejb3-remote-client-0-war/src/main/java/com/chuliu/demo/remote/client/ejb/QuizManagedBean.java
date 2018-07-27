@@ -43,7 +43,8 @@ public class QuizManagedBean {
         //####
         String ejbsServerAddress = "127.0.0.1";
         int ejbsServerPort = 8080;
-        String earName = "ejb3-server-client-ear";
+        //String earName = "ejb3-server-client-ear";
+        String earName = "";
         String moduleName = "ejb3-server-war";
         String deploymentDistinctName = "";
         String beanName = "QuizBean";
